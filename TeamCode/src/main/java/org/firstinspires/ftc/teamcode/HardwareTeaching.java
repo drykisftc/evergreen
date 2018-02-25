@@ -1,71 +1,57 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.concurrent.DelayQueue;
 
 /**
- * This is NOT an opmode.
- *
- * This class can be used to define all the specific hardware for a single robot.
- * In this case that robot is a Pushbot.
- * See PushbotTeleopTank_Iterative and others classes starting with "Pushbot" for usage examples.
- *
- * This hardware class assumes the following device names have been configured on the robot:
- * Note:  All names are lower case and some have single spaces between words.
- *
- * Motor channel:  Left  drive motor:        "left_drive"
- * Motor channel:  Right drive motor:        "right_drive"
- * Motor channel:  Manipulator drive motor:  "left_arm"
- * Servo channel:  Servo to open left claw:  "left_hand"
- * Servo channel:  Servo to open right claw: "right_hand"
+
+ 24 inches have 2082 (1939) encoder counts that is 86.75(80.79)encoder counts per inch
+ Nathan has wheel base of (15.25) inches.
  */
-public class HardwareTeaching
+public class HardwareTeaching extends HardwareBase
 {
-    /* Public OpMode members. */
-    public DcMotor  leftDrive   = null;
-    public DcMotor  rightDrive  = null;
-    public DcMotor  leftArm     = null;
-    public Servo    leftClaw    = null;
-    public Servo    rightClaw   = null;
+    // DC Motors
+    public DcMotor motorLeftWheel = null;
+    public DcMotor motorRightWheel = null;
+    public DcMotor liftMotor = null;
 
-    public static final double MID_SERVO       =  0.5 ;
-    public static final double ARM_UP_POWER    =  0.45 ;
-    public static final double ARM_DOWN_POWER  = -0.45 ;
+    //Servos
+    public Servo leftHand = null;
+    public Servo rightHand = null;
 
-    /* local OpMode members. */
-    HardwareMap hwMap           =  null;
-    private ElapsedTime period  = new ElapsedTime();
+    public ColorSensor jewelSensor = null;
+    public DistanceSensor jewelSensorDistance = null;
+
+    public Servo jewelArm = null;
+    public Servo jewelHitter = null;
+
+    ModernRoboticsI2cGyro gyro = null;
+
+    //Sensors
+    //public ColorSensor jewelSensor;
+    //public DistanceSensor jewelSensorDistance;
+
+    // limits
+    int liftHeightLimit = 5500;
+    int liftMotorPosition = 0;
+    double liftMotorHolderPower = 0.3;
+
+    double leftHandOpenPosition = 1.0;
+    double leftHandClosePosition = 0.4;
+    double leftHandChargePosition = 0.8;
+    double rightHandOpenPosition = 0.0;
+    double rightHandClosePosition = 0.6;
+    double rightHandChargePosition = 0.2;
+
+    protected float axleDistance = 1323;//1232; //1248f;//1254
 
     /* Constructor */
     public HardwareTeaching(){
@@ -73,33 +59,73 @@ public class HardwareTeaching
     }
 
     /* Initialize standard Hardware interfaces */
+    @Override
     public void init(HardwareMap ahwMap) {
-        // Save reference to Hardware map
-        hwMap = ahwMap;
 
-        // Define and Initialize Motors
-        leftDrive  = hwMap.get(DcMotor.class, "left_drive");
-        rightDrive = hwMap.get(DcMotor.class, "right_drive");
-        leftArm    = hwMap.get(DcMotor.class, "left_arm");
-        leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        super.init(ahwMap);
 
-        // Set all motors to zero power
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-        leftArm.setPower(0);
+        motorLeftWheel = hwMap.dcMotor.get("leftWheel");
+        motorRightWheel = hwMap.dcMotor.get("rightWheel");
+        motorLeftWheel.setDirection(DcMotor.Direction.REVERSE);  // 40 to 1 andymark motor
+        motorRightWheel.setDirection(DcMotor.Direction.FORWARD); // 40 to 1 andymark motor
+        motorLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftMotor = hwMap.dcMotor.get("liftMotor");
+        liftMotor.setDirection(DcMotor.Direction.FORWARD);
+        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Define and initialize ALL installed servos.
-        leftClaw  = hwMap.get(Servo.class, "left_hand");
-        rightClaw = hwMap.get(Servo.class, "right_hand");
-        leftClaw.setPosition(MID_SERVO);
-        rightClaw.setPosition(MID_SERVO);
+        leftHand = hwMap.servo.get("leftHand");
+        rightHand = hwMap.servo.get("rightHand");
+
+        jewelHitter = hwMap.servo.get("jewelHitter");
+        jewelArm = hwMap.servo.get("jewelArm");
+
+        jewelSensor = hwMap.colorSensor.get("jewelSensor");
+        jewelSensor.enableLed(true);
+
+        gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
+
     }
- }
 
+    @Override
+    public void start() {
+        // wheels
+        motorLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorLeftWheel.setPower(0.0);
+        motorRightWheel.setPower(0.0);
+
+        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.setPower(0.0);
+
+        // init positions
+        jewelArm.setPosition(0.8);
+        jewelHitter.setPosition(0.5);
+        leftHand.setPosition(leftHandOpenPosition);
+        rightHand.setPosition(rightHandOpenPosition);
+        jewelSensor.enableLed(true);
+    }
+
+    @Override
+    public void stop() {
+        motorLeftWheel.setPower(0.0);
+        motorRightWheel.setPower(0.0);
+        liftMotor.setPower(0.0);
+
+        motorLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    }
+
+    public float getGyroHeading () {
+        return -gyro.getHeading();
+    }
+}
