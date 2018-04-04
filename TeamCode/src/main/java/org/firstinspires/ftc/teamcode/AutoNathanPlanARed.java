@@ -37,7 +37,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.util.Random;
 
-@Autonomous(name = "Nathen_PlanA_Red", group = "Nathen")
+@Autonomous(name = "Auto", group = "Teaching")
 @Disabled
 public class AutoNathanPlanARed extends AutoRelic {
 

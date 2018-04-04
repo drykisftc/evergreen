@@ -56,8 +56,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="TeleOp: A Pro Nathen", group="TeleOp")
-@Disabled
+@TeleOp(name="TeleOp: Tank", group="Teaching")
 public class TeleOpTeaching extends OpMode{
 
     /* Declare OpMode members. */
