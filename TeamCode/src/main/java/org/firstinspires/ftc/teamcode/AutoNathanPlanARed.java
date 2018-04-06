@@ -37,11 +37,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.util.Random;
 
-@Autonomous(name = "Nathen_PlanA_Red", group = "Nathen")
+@Autonomous(name = "Auto", group = "Teaching")
 @Disabled
 public class AutoNathanPlanARed extends AutoRelic {
 
-    protected HardwareTeaching robot= null;
+    protected HardwareNathan robot= null;
 
     int glyphLiftPosition = 0;
     int glyphLiftPosition2= 0;
@@ -76,7 +76,7 @@ public class AutoNathanPlanARed extends AutoRelic {
     public void init() {
 
         //
-        robot = new HardwareTeaching();
+        robot = new HardwareNathan();
         robot.init(hardwareMap);
         robot.start();
 
