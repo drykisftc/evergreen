@@ -35,21 +35,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
-@Autonomous(name = "Auto", group = "Teaching")
-@Disabled
+@Autonomous(name = "AutoGyro", group = "Teaching")
 public class AutoGyroNavigation extends AutoRelic {
 
-    protected HardwareNathan robot= null;
-
-
+    int movingForwardDistance = 3000;
+    int wheelLandMark = 0;
+    int turnDegree = 90;
     public AutoGyroNavigation() {
 
     }
 
     @Override
     public void init() {
+        robot = new HardwareTeaching();
+        robot.init(hardwareMap);
+        robot.start();
 
-
+        robot.gyro.calibrate();
     }
 
     @Override
@@ -65,16 +67,46 @@ public class AutoGyroNavigation extends AutoRelic {
 
     @Override
     public void start() {
-
+        wheelLandMark = (robot.motorLeftWheel.getCurrentPosition() +
+                robot.motorRightWheel.getCurrentPosition()) /2;
     }
 
     @Override
     public void loop() {
         switch (state) {
             case 0:
+                // move forward
+                if (movingForwardDistance > 0) {
+                    robot.motorLeftWheel.setPower(1.0);
+                    robot.motorRightWheel.setPower(1.0);
+                    if (wheelLandMark + movingForwardDistance < (robot.motorLeftWheel.getCurrentPosition() +
+                            robot.motorRightWheel.getCurrentPosition()) / 2) {
+                        robot.motorLeftWheel.setPower(0.0);
+                        robot.motorRightWheel.setPower(0.0);
+                        navigation.resetTurn(leftMotors, rightMotors);
+                        state = 1;
+                    }
+                } else {
+                    robot.motorLeftWheel.setPower(-1.0);
+                    robot.motorRightWheel.setPower(-1.0);
+                    if (wheelLandMark + movingForwardDistance > (robot.motorLeftWheel.getCurrentPosition() +
+                            robot.motorRightWheel.getCurrentPosition()) / 2) {
+                        robot.motorLeftWheel.setPower(0.0);
+                        robot.motorRightWheel.setPower(0.0);
+                        navigation.resetTurn(leftMotors, rightMotors);
+                        state = 1;
+                    }
+                }
+                //
 
                break;
-            case 19:
+            case 1:
+                // turn by gyro
+                if (0 == navigation.turnByGyroCloseLoop(0, robot.gyro.getHeading(), turnDegree,
+                        leftMotors, rightMotors)) {
+                    state = 0;
+                }
+
 
                 break;
             default:
