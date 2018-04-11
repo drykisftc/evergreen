@@ -51,6 +51,11 @@ public class AutoGyroNavigation extends AutoRelic {
         robot.init(hardwareMap);
         robot.start();
 
+        leftMotors = new DcMotor[1];
+        leftMotors[0] = robot.motorLeftWheel;
+        rightMotors = new DcMotor[1];
+        rightMotors[0] = robot.motorRightWheel;
+
         robot.gyro.calibrate();
     }
 
