@@ -32,10 +32,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -53,12 +51,12 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Mecanum", group="Teaching")
-public class TeleOpMecanum extends OpMode{
+@TeleOp(name="Lift", group="Teaching")
+public class TeleOpLiftControl extends OpMode{
 
     /* Declare OpMode members. */
     protected HardwareMecanum robot = new HardwareMecanum();
-
+    
     double [] wheelPowerLUT = {0.0f, 0.05f, 0.15f, 0.18f, 0.20f,
             0.22f, 0.24f, 0.26f, 0.28f, 0.30f, 0.32f, 0.34f, 0.36f,
             0.38f, 0.42f, 0.46f, 0.50f, 0.54f, 0.58f, 0.62f, 0.66f,
