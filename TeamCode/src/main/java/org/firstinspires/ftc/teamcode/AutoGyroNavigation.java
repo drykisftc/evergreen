@@ -56,6 +56,14 @@ public class AutoGyroNavigation extends AutoRelic {
         rightMotors = new DcMotor[1];
         rightMotors[0] = robot.motorRightWheel;
 
+        navigation = new Navigation(telemetry);
+        navigation.pidControlHeading.setKp(0.004);
+        navigation.pidControlHeading.setKi(0.002);
+        navigation.pidControlHeading.setKd(0.0000001);
+        navigation.maxTurnDeltaPower = 0.4;
+        navigation.convergeCountThreshold = 6;
+        navigation.angleErrorTolerance = 2.1;
+
         robot.gyro.calibrate();
     }
 
@@ -78,6 +86,9 @@ public class AutoGyroNavigation extends AutoRelic {
 
     @Override
     public void loop() {
+        telemetry.addData("State:" , state);
+        telemetry.addData("leftMotor:", leftMotors[0]);
+        telemetry.addData("rightMotor:", rightMotors[0]);
         switch (state) {
             case 0:
                 // move forward
@@ -109,6 +120,11 @@ public class AutoGyroNavigation extends AutoRelic {
                 // turn by gyro
                 if (0 == navigation.turnByGyroCloseLoop(0, robot.gyro.getHeading(), turnDegree,
                         leftMotors, rightMotors)) {
+                    navigation.resetTurn(leftMotors, rightMotors);
+                    getWheelLandmarks();
+                    wheelLandMark = (robot.motorLeftWheel.getCurrentPosition() +
+                            robot.motorRightWheel.getCurrentPosition()) /2;
+                    turnDegree+=90;
                     state = 0;
                 }
 
