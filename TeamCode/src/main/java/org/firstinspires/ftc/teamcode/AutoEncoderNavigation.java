@@ -117,23 +117,11 @@ public class AutoEncoderNavigation extends AutoRelic {
                 robot.motorLeftWheel.setPower(power);
                 robot.motorRightWheel.setPower(power);
 
-               break;
-
-            case 1:
-                // turn by gyro
-                if (0 == navigation.turnByGyroCloseLoop(0, robot.gyro.getHeading(), turnDegree,
-                        leftMotors, rightMotors)) {
-                    navigation.resetTurn(leftMotors, rightMotors);
-                    getWheelLandmarks();
-                    wheelLandMark = (robot.motorLeftWheel.getCurrentPosition() +
-                            robot.motorRightWheel.getCurrentPosition()) /2;
-                    turnDegree+=90;
-                    state = 0;
-                }
-
-
                 break;
             default:
+                // stop
+                robot.motorLeftWheel.setPower(0);
+                robot.motorRightWheel.setPower(0);
                 robot.stop();
         }
 
