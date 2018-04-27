@@ -54,8 +54,6 @@ import java.util.Random;
 @Disabled
 public class AutoRelic extends OpMode {
 
-    protected HardwareTeaching robot= null;
-
     protected String teamColor = "red";
 
 

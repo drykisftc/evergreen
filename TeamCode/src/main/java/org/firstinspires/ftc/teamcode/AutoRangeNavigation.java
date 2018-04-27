@@ -29,67 +29,66 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "AutoEncoder", group = "Teaching")
-public class AutoEncoderNavigation extends AutoRelic {
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-    protected HardwareTeaching robot= null;
+@Autonomous(name = "AutoRangeSensor", group = "Teaching")
+public class AutoRangeNavigation extends AutoRelic {
 
-    PIDControl encoderDisPID = new PIDControl();
+    HardwareMecanum robot = null;
 
-    int movingForwardDistance = 3000;
-    int wheelLandMark = 0;
-    int turnDegree = 90;
+    PIDControl rangePID = new PIDControl();
 
     int convergeCount =0;
-    public AutoEncoderNavigation() {
+
+    ModernRoboticsI2cRangeSensor range = null;
+
+    double targetDistance = 5;
+
+    public AutoRangeNavigation() {
 
     }
 
     @Override
     public void init() {
-        robot = new HardwareTeaching();
+        robot = new HardwareMecanum();
         robot.init(hardwareMap);
         robot.start();
 
-        leftMotors = new DcMotor[1];
-        leftMotors[0] = robot.motorLeftWheel;
-        rightMotors = new DcMotor[1];
-        rightMotors[0] = robot.motorRightWheel;
+        leftMotors = new DcMotor[2];
+        leftMotors[0] = robot.motorLeftFrontWheel;
+        leftMotors[1] = robot.motorLeftBackWheel;
+        rightMotors = new DcMotor[2];
+        rightMotors[0] = robot.motorRightFrontWheel;
+        rightMotors[1] = robot.motorRightBackWheel;
 
-        navigation = new Navigation(telemetry);
-        navigation.pidControlHeading.setKp(0.004);
-        navigation.pidControlHeading.setKi(0.002);
-        navigation.pidControlHeading.setKd(0.0000001);
-        navigation.maxTurnDeltaPower = 0.4;
-        navigation.convergeCountThreshold = 6;
-        navigation.angleErrorTolerance = 2.1;
-
-        encoderDisPID.setKp(0.0005);
-        encoderDisPID.setKi(0.0001);
-        encoderDisPID.setKd(0.00001);
+        rangePID.setKp(0.0005);
+        rangePID.setKi(0.0001);
+        rangePID.setKd(0.00001);
         convergeCount =0;
 
-        robot.gyro.calibrate();
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
+
     }
 
     @Override
     public void init_loop () {
-        if (robot.gyro.isCalibrating())  {
-            telemetry.addData(">", "Gyro is calibrating.  DO NOT start!!!!");
-            telemetry.addData(">", "Wait! Wait! Wait! ");
+        if (gamepad1.x) {
+            targetDistance += 0.1;
         }
-        else {
-            telemetry.addData(">", "Press Start.");
+
+        if (gamepad1.y) {
+            targetDistance -= 0.1;
         }
+
     }
 
     @Override
     public void start() {
-        wheelLandMark = (robot.motorLeftWheel.getCurrentPosition() +
-                robot.motorRightWheel.getCurrentPosition()) /2;
+
     }
 
     @Override
@@ -100,10 +99,11 @@ public class AutoEncoderNavigation extends AutoRelic {
         switch (state) {
             case 0:
                 // move forward
-                int errorDis = (wheelLandMark + movingForwardDistance)
-                -(robot.motorLeftWheel.getCurrentPosition() + robot.motorRightWheel.getCurrentPosition())/2;
+                double d = range.getDistance(DistanceUnit.INCH);
 
-                if (Math.abs(errorDis) < 50) {
+                double errorDis = targetDistance -d;
+
+                if (Math.abs(errorDis) < 0.5) {
                     convergeCount ++;
                 } else
                 {
@@ -115,15 +115,27 @@ public class AutoEncoderNavigation extends AutoRelic {
                     convergeCount = 0;
                 }
 
-                double power = navigation.pidControlDistance.update(errorDis, System.currentTimeMillis());
-                robot.motorLeftWheel.setPower(power);
-                robot.motorRightWheel.setPower(power);
+                double power = rangePID.update(errorDis, System.currentTimeMillis());
+
+                for (int i =0; i < leftMotors.length; i++) {
+                    leftMotors[i].setPower(power);
+                }
+
+                for (int i =0; i < rightMotors.length; i++) {
+                    rightMotors[i].setPower(power);
+                }
 
                 break;
             default:
                 // stop
-                robot.motorLeftWheel.setPower(0);
-                robot.motorRightWheel.setPower(0);
+                for (int i =0; i < leftMotors.length; i++) {
+                    leftMotors[i].setPower(0);
+                }
+
+                for (int i =0; i < rightMotors.length; i++) {
+                    rightMotors[i].setPower(0);
+                }
+                state = 0;
                 robot.stop();
         }
 

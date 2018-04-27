@@ -38,6 +38,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 @Autonomous(name = "AutoGyro", group = "Teaching")
 public class AutoGyroNavigation extends AutoRelic {
 
+    protected HardwareTeaching robot= null;
+
     int movingForwardDistance = 3000;
     int wheelLandMark = 0;
     int turnDegree = 90;
