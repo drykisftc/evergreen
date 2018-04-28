@@ -14,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import com.vuforia.Image;
+import com.vuforia.PIXEL_FORMAT;
 
 /**
  * This is NOT an OpMode
@@ -98,5 +100,29 @@ public class HardwareVuforia extends HardwareBase
 
     public OpenGLMatrix getGlyphCryptoPosition() {
         return ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
+    }
+
+    public Image getImage(){
+        VuforiaLocalizer.CloseableFrame frame = null;
+        try{
+            frame = vuforia.getFrameQueue().take();
+            long numImages = frame.getNumImages();
+            Image rgbImage = null;
+            for (int i = 0; i < numImages; i++) {
+                Image img = frame.getImage(i);
+                int fmt = img.getFormat();
+                if (fmt == PIXEL_FORMAT.RGB565) {
+                    rgbImage = frame.getImage(i);
+                    break;
+                }
+            }
+            return rgbImage;
+        }
+        catch(InterruptedException exc){
+            return null;
+        }
+        finally{
+            if (frame != null) frame.close();
+        }
     }
 }

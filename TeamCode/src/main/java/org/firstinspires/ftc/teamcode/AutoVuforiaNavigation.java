@@ -35,10 +35,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@Autonomous(name = "AutoRangeSensor", group = "Teaching")
-public class AutoRangeNavigation extends AutoRelic {
+@Autonomous(name = "AutoVuforia", group = "Teaching")
+public class AutoVuforiaNavigation extends AutoRelic {
 
     HardwareMecanum robot = null;
+
+    HardwareVuforia mVuforia = null;
 
     PIDControl rangePID = new PIDControl();
 
@@ -48,7 +50,7 @@ public class AutoRangeNavigation extends AutoRelic {
 
     double targetDistance = 5;
 
-    public AutoRangeNavigation() {
+    public AutoVuforiaNavigation() {
 
     }
 
