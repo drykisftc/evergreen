@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Bitmap;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,6 +16,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+
 import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
 
@@ -124,5 +130,17 @@ public class HardwareVuforia extends HardwareBase
         finally{
             if (frame != null) frame.close();
         }
+    }
+
+    public Mat vuforiaImageToOpenCvImage (Image rgb) {
+
+        Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
+        bm.copyPixelsFromBuffer(rgb.getPixels());
+
+        //put the image into a MAT for OpenCV
+        Mat tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
+        Utils.bitmapToMat(bm, tmp);
+
+        return tmp;
     }
 }
