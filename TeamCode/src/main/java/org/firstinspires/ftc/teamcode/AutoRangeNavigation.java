@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.opencv.core.Range;
 
 @Autonomous(name = "AutoRangeSensor", group = "Teaching")
 public class AutoRangeNavigation extends AutoRelic {
@@ -47,6 +48,8 @@ public class AutoRangeNavigation extends AutoRelic {
     ModernRoboticsI2cRangeSensor range = null;
 
     double targetDistance = 5;
+
+    long lastTime;
 
     public AutoRangeNavigation() {
 
@@ -65,9 +68,11 @@ public class AutoRangeNavigation extends AutoRelic {
         rightMotors[0] = robot.motorRightFrontWheel;
         rightMotors[1] = robot.motorRightBackWheel;
 
-        rangePID.setKp(0.0005);
-        rangePID.setKi(0.0001);
+        rangePID.setKp(0.005);
+        rangePID.setKi(0.001);
         rangePID.setKd(0.00001);
+        rangePID.setMaxIntegralError(0.6f/rangePID.fKi);
+
         convergeCount =0;
 
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
@@ -88,43 +93,50 @@ public class AutoRangeNavigation extends AutoRelic {
 
     @Override
     public void start() {
-
+        rangePID.reset();
+        lastTime = System.currentTimeMillis();
     }
 
     @Override
     public void loop() {
         telemetry.addData("State:" , state);
-        telemetry.addData("leftMotor:", leftMotors[0]);
-        telemetry.addData("rightMotor:", rightMotors[0]);
+
         switch (state) {
             case 0:
                 // move forward
                 double d = range.getDistance(DistanceUnit.INCH);
+                telemetry.addData("Distance:" , d);
 
-                double errorDis = targetDistance -d;
+                if (!Double.isNaN(d)) {
+                    double errorDis = targetDistance - d;
+                    telemetry.addData("Error:" , errorDis);
 
-                if (Math.abs(errorDis) < 0.5) {
-                    convergeCount ++;
-                } else
-                {
-                    convergeCount = 0;
+                    if (Math.abs(errorDis) < 0.5) {
+                        convergeCount++;
+                    } else {
+                        convergeCount = 0;
+                    }
+
+                    if (convergeCount > 5) {
+                        state = 1;
+                        convergeCount = 0;
+                    }
+
+                    long currentTime = System.currentTimeMillis();
+                    double power = com.qualcomm.robotcore.util.Range.clip(-rangePID.update(errorDis, currentTime-lastTime),-1,1);
+                    lastTime = currentTime;
+
+                    telemetry.addData("Power:" , power);
+
+                    for (int i = 0; i < leftMotors.length; i++) {
+                        leftMotors[i].setPower(power);
+                    }
+
+                    for (int i = 0; i < rightMotors.length; i++) {
+                        rightMotors[i].setPower(power);
+                    }
+
                 }
-
-                if (convergeCount > 5) {
-                    state = 1;
-                    convergeCount = 0;
-                }
-
-                double power = rangePID.update(errorDis, System.currentTimeMillis());
-
-                for (int i =0; i < leftMotors.length; i++) {
-                    leftMotors[i].setPower(power);
-                }
-
-                for (int i =0; i < rightMotors.length; i++) {
-                    rightMotors[i].setPower(power);
-                }
-
                 break;
             default:
                 // stop
@@ -136,7 +148,7 @@ public class AutoRangeNavigation extends AutoRelic {
                     rightMotors[i].setPower(0);
                 }
                 state = 0;
-                robot.stop();
+                //robot.stop();
         }
 
     }
