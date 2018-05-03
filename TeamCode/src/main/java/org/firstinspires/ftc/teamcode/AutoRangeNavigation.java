@@ -68,10 +68,10 @@ public class AutoRangeNavigation extends AutoRelic {
         rightMotors[0] = robot.motorRightFrontWheel;
         rightMotors[1] = robot.motorRightBackWheel;
 
-        rangePID.setKp(0.005);
-        rangePID.setKi(0.001);
-        rangePID.setKd(0.00001);
-        rangePID.setMaxIntegralError(0.6f/rangePID.fKi);
+        rangePID.setKp(0.06);
+        rangePID.setKi(0.0008);
+        rangePID.setKd(0.00000);
+        rangePID.setMaxIntegralError(0.06f/rangePID.fKi);
 
         convergeCount =0;
 
@@ -120,20 +120,22 @@ public class AutoRangeNavigation extends AutoRelic {
                     if (convergeCount > 5) {
                         state = 1;
                         convergeCount = 0;
-                    }
+                    } else {
 
-                    long currentTime = System.currentTimeMillis();
-                    double power = com.qualcomm.robotcore.util.Range.clip(-rangePID.update(errorDis, currentTime-lastTime),-1,1);
-                    lastTime = currentTime;
+                        long currentTime = System.currentTimeMillis();
+                        double power
+                                = com.qualcomm.robotcore.util.Range.clip(-rangePID.update(errorDis, currentTime - lastTime), -1, 1);
+                        lastTime = currentTime;
 
-                    telemetry.addData("Power:" , power);
+                        telemetry.addData("Power:", power);
 
-                    for (int i = 0; i < leftMotors.length; i++) {
-                        leftMotors[i].setPower(power);
-                    }
+                        for (int i = 0; i < leftMotors.length; i++) {
+                            leftMotors[i].setPower(power);
+                        }
 
-                    for (int i = 0; i < rightMotors.length; i++) {
-                        rightMotors[i].setPower(power);
+                        for (int i = 0; i < rightMotors.length; i++) {
+                            rightMotors[i].setPower(power);
+                        }
                     }
 
                 }
@@ -148,6 +150,7 @@ public class AutoRangeNavigation extends AutoRelic {
                     rightMotors[i].setPower(0);
                 }
                 state = 0;
+                rangePID.reset();
                 //robot.stop();
         }
 
