@@ -81,6 +81,7 @@ public class AutoRangeNavigation extends AutoRelic {
 
     @Override
     public void init_loop () {
+
         if (gamepad1.x) {
             targetDistance += 0.1;
         }
@@ -88,6 +89,8 @@ public class AutoRangeNavigation extends AutoRelic {
         if (gamepad1.y) {
             targetDistance -= 0.1;
         }
+
+        telemetry.addData("Target Distance:" , targetDistance);
 
     }
 
