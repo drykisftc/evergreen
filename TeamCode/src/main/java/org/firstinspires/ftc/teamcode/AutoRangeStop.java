@@ -38,7 +38,7 @@ import java.util.*;
 
 @Autonomous(name = "AutoRangeStop", group = "Teaching")
 public class AutoRangeStop extends AutoRelic {
-    final int measureCounter = 20;
+    int measureCounter = 0;
     double avgMeasurement;
     long lasttime;
     double lastdistance;
@@ -54,6 +54,8 @@ public class AutoRangeStop extends AutoRelic {
     double targetDistance = 5;
 
     long lastTime;
+
+    double totalMeasurement = 0;
 
     public AutoRangeStop() {
 
@@ -102,54 +104,55 @@ public class AutoRangeStop extends AutoRelic {
     public void start() {
         rangePID.reset();
         lastTime = System.currentTimeMillis();
+        totalMeasurement =0;
+        measureCounter =0;
     }
 
     @Override
     public void loop() {
         telemetry.addData("State:" , state);
         switch (state) {
-            case 1:
-                double totalMeasurement = 0;
-                for (int i = 0; i < measureCounter; i++) {
-                    totalMeasurement += range.getDistance(DistanceUnit.INCH);
-                }
-                avgMeasurement = totalMeasurement / measureCounter;
-                lastdistance = avgMeasurement;
-                lasttime = System.currentTimeMillis();
-                telemetry.addData("Average distance: ", avgMeasurement);
-                state = 0;
-                break;
             case 0:
-                // move forward
+
                 double d = range.getDistance(DistanceUnit.INCH);
-                telemetry.addData("current Distance:" , d);
 
-                if (!Double.isNaN(d)) {
-                    long time = System.currentTimeMillis();
-                    telemetry.addData(Long.toString(time) + ": ", d);
-                    double slope = (d - lastdistance) / (time - lasttime);
-                    if (convergeCount > 5) {
-                        state = 1;
-                        convergeCount = 0;
-                    } else {
-
-                        long currentTime = System.currentTimeMillis();
-                        double power
-                                = com.qualcomm.robotcore.util.Range.clip(-rangePID.update(d, currentTime - lastTime), -1, 1);
-                        lastTime = currentTime;
-
-                        telemetry.addData("Power:", power);
-
-                        for (int i = 0; i < leftMotors.length; i++) {
-                            leftMotors[i].setPower(power);
-                        }
-
-                        for (int i = 0; i < rightMotors.length; i++) {
-                            rightMotors[i].setPower(power);
-                        }
-                    }
-
+                if (Double.isNaN(d)) {
+                    d = 1000;
                 }
+
+                totalMeasurement += d;
+                measureCounter ++;
+
+                // stop
+                for (int i = 0; i < 2; i++) {
+                    leftMotors[i].setPower(0);
+                    rightMotors[i].setPower(0);
+                }
+
+                if ( measureCounter > 20) {
+                    avgMeasurement = totalMeasurement / measureCounter;
+                    lastdistance = avgMeasurement;
+                    lasttime = System.currentTimeMillis();
+                    telemetry.addData("Average distance: ", avgMeasurement);
+                    state = 1;
+                }
+
+                break;
+            case 1:
+                double d2 = range.getDistance(DistanceUnit.INCH);
+                telemetry.addData("current Distance:" , d2);
+                //detect wall appear
+                if(d2 < avgMeasurement/1.2) {
+                    state = 2;
+                }
+                else {
+                    // side move
+                    robot.motorLeftBackWheel.setPower(0.6);
+                    robot.motorLeftFrontWheel.setPower(-0.6);
+                    robot.motorRightBackWheel.setPower(-0.6);
+                    robot.motorRightFrontWheel.setPower(0.6);
+                }
+
                 break;
             default:
                 // stop
@@ -160,7 +163,6 @@ public class AutoRangeStop extends AutoRelic {
                 for (int i =0; i < rightMotors.length; i++) {
                     rightMotors[i].setPower(0);
                 }
-                state = 0;
                 rangePID.reset();
                 //robot.stop();
         }
