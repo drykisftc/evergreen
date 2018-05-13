@@ -43,6 +43,8 @@ public class AutoGyroMecanum extends AutoRelic {
 
     int convergeCount =0;
 
+    PIDControl distancePID = new PIDControl();
+
     public AutoGyroMecanum() {
 
     }
@@ -64,9 +66,15 @@ public class AutoGyroMecanum extends AutoRelic {
         navigation.pidControlHeading.setKp(0.004);
         navigation.pidControlHeading.setKi(0.002);
         navigation.pidControlHeading.setKd(0.0000001);
+        navigation.pidControlHeading.setMaxIntegralError(0.12f/navigation.pidControlHeading.fKi);
         navigation.maxTurnDeltaPower = 0.4;
         navigation.convergeCountThreshold = 6;
         navigation.angleErrorTolerance = 2.1;
+
+        distancePID.setKp(0.06);
+        distancePID.setKi(0.008);
+        distancePID.setKd(0.00000);
+        distancePID.setMaxIntegralError(0.06f/ distancePID.fKi);
 
     }
 
@@ -83,8 +91,7 @@ public class AutoGyroMecanum extends AutoRelic {
     @Override
     public void loop() {
         telemetry.addData("State:", state);
-        telemetry.addData("leftMotor:", leftMotors[0]);
-        telemetry.addData("rightMotor:", rightMotors[0]);
+
         switch (state) {
             case 0:
 
@@ -104,7 +111,7 @@ public class AutoGyroMecanum extends AutoRelic {
                     wheelLandMark = getMovingDistance();
                 }
 
-                double power = navigation.pidControlDistance.update(errorDis, System.currentTimeMillis());
+                double power = distancePID.update(errorDis, System.currentTimeMillis());
                 setMovingPower(power);
 
                 break;
