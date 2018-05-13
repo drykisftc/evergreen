@@ -64,17 +64,17 @@ public class AutoGyroMecanum extends AutoRelic {
 
         navigation = new Navigation(telemetry);
         navigation.pidControlHeading.setKp(0.004);
-        navigation.pidControlHeading.setKi(0.002);
+        navigation.pidControlHeading.setKi(0.004);
         navigation.pidControlHeading.setKd(0.0000001);
-        navigation.pidControlHeading.setMaxIntegralError(0.12f/navigation.pidControlHeading.fKi);
+        navigation.pidControlHeading.setMaxIntegralError(0.22f/navigation.pidControlHeading.fKi);
         navigation.maxTurnDeltaPower = 0.4;
         navigation.convergeCountThreshold = 6;
         navigation.angleErrorTolerance = 2.1;
 
-        distancePID.setKp(0.06);
-        distancePID.setKi(0.008);
+        distancePID.setKp(0.0003);
+        distancePID.setKi(0.00008);
         distancePID.setKd(0.00000);
-        distancePID.setMaxIntegralError(0.06f/ distancePID.fKi);
+        distancePID.setMaxIntegralError(0.002f/ distancePID.fKi);
 
     }
 
