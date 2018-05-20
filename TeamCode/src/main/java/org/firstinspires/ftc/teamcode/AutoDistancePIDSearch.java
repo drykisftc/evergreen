@@ -107,6 +107,9 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
                 if (dIndex == Ds.length) {
                     aiState = 3;
+
+                    // flip distance
+                    movingForwardDistance *= -1;
                 }
                 break;
             case 3:

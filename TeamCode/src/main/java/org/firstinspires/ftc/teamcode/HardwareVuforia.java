@@ -94,7 +94,7 @@ public class HardwareVuforia extends HardwareBase
 
     @Override
     public void stop() {
-
+        relicTrackables.deactivate();
     }
 
     public void identifyGlyphCrypto (){
