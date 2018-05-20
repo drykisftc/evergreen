@@ -34,7 +34,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 @Autonomous(name = "AutoDistancePIDSearch", group = "Teaching")
-public class AutoDistancePIDSearchMecanum extends AutoDistanceMecanum {
+public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
     int aiState =0;
     double [] Ps = { 0.0001, 0.001, 0.01 };
