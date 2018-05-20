@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
 
 @Autonomous(name = "AutoGyroMecanum", group = "Teaching")
 public class AutoGyroMecanum extends AutoRelic {
@@ -72,8 +73,8 @@ public class AutoGyroMecanum extends AutoRelic {
         navigation.angleErrorTolerance = 2.1;
 
         distancePID.setKp(0.0003);
-        distancePID.setKi(0.00008);
-        distancePID.setKd(0.00000);
+        distancePID.setKi(0.000008);
+        distancePID.setKd(0.00000000);
         distancePID.setMaxIntegralError(0.002f/ distancePID.fKi);
 
     }
@@ -112,7 +113,7 @@ public class AutoGyroMecanum extends AutoRelic {
                 }
 
                 double power = distancePID.update(errorDis, System.currentTimeMillis());
-                setMovingPower(power);
+                setMovingPower(Range.clip(power,-1,1));
 
                 break;
             case 1:
