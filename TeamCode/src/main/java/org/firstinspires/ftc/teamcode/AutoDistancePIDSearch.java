@@ -71,14 +71,29 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
     @Override
     public void loop() {
-        telemetry.addData("best Kp=", Ps[pIndex]);
-        telemetry.addData("best ki=", Is[iIndex]);
-        telemetry.addData("best kd=", Ds[dIndex]);
+        if (pIndex < Ps.length) {
+            telemetry.addData("best Kp=", Ps[pIndex]);
+        }
+        if (iIndex < Is.length) {
+            telemetry.addData("best ki=", Is[iIndex]);
+        }
+        if (dIndex < Ds.length) {
+            telemetry.addData("best kd=", Ds[dIndex]);
+        }
         switch (aiState)
         {
             case 0:
                 super.start();
                 // TODO: loop through PID parameters
+                if (Ps.length >= pIndex) {
+                    pIndex = 0;
+                }
+                if (Is.length >= iIndex) {
+                    iIndex = 0;
+                }
+                if (Ds.length >= dIndex) {
+                    dIndex = 0;
+                }
 
                 // set pid parameters
                 encoderDisPID.setKp(Ps[pIndex]);
@@ -88,6 +103,8 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
                 // start timer
                 pidStartTS = System.currentTimeMillis();
+
+                aiState = 1;
 
                 break;
             case 1:
@@ -105,12 +122,10 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
                     shortestT = pidEndTS - pidStartTS;
                 }
 
-                if (dIndex == Ds.length) {
-                    aiState = 3;
+                aiState = 3;
+                // flip distance
+                movingForwardDistance *= -1;
 
-                    // flip distance
-                    movingForwardDistance *= -1;
-                }
                 break;
             case 3:
                 // find out the best PID parameter
@@ -118,7 +133,29 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
                 telemetry.addData("best ki=", bestI);
                 telemetry.addData("best kd=", bestD);
 
-                default:
+                // TODO: index handling
+                dIndex ++;
+
+                if (dIndex >= Ds.length) {
+                    iIndex++;
+                }
+                if (iIndex >= Is.length) {
+                    pIndex ++;
+                }
+
+                if ( dIndex >= Ds.length && iIndex >= Is.length && pIndex >= Ps.length) {
+                    aiState = 4;
+                } else {
+                    aiState = 0;
+                }
+
+                break;
+
+            default:
+                telemetry.addData("best Kp=", bestP);
+                telemetry.addData("best ki=", bestI);
+                telemetry.addData("best kd=", bestD);
+                telemetry.addData("Done", "!");
         }
     }
 
