@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
-@Autonomous(name = "AutoVuforia", group = "Teaching")
+@Autonomous(name = "AutoVuforiaMecanum", group = "Teaching")
 public class AutoVuforiaMecanum extends AutoRelic {
 
     protected HardwareMecanum robot= null;

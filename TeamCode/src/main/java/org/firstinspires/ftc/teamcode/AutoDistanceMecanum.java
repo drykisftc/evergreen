@@ -88,12 +88,12 @@ public class AutoDistanceMecanum extends AutoRelic {
 
     public int execute() {
         telemetry.addData("State:" , state);
-        telemetry.addData("leftMotor:", leftMotors[0]);
-        telemetry.addData("rightMotor:", rightMotors[0]);
+
         switch (state) {
             case 0:
                 // move forward
                 int distance = getMovingDistance();
+                telemetry.addData("Distance:" , distance);
                 int errorDis = (wheelLandMark + movingForwardDistance) - distance;
                 if (Math.abs(errorDis) < 50) {
                     convergeCount ++;
@@ -114,6 +114,8 @@ public class AutoDistanceMecanum extends AutoRelic {
             default:
                 // stop
                 setMovingPower(0);
+                wheelLandMark = getMovingDistance();
+                convergeCount =0;
                 return 0;
         }
         return 1;
