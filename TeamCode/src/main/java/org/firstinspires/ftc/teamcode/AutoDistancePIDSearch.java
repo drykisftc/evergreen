@@ -37,6 +37,8 @@ import com.qualcomm.robotcore.util.Range;
 public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
     int aiState =0;
+
+    // TODO: change searching range
     double [] Ps = { 0.0001, 0.001, 0.01 };
     double [] Is = { 0.0001, 0.001, 0.01 };
     double [] Ds = { 0.00000, 0.00001, 0.0001 } ;
