@@ -134,28 +134,4 @@ public class AutoGyroMecanum extends AutoRelic {
 
     }
 
-    protected int getMovingDistance () {
-        int distance = 0;
-
-        for (int i = 0; i < leftMotors.length; i++) {
-            distance += leftMotors[i].getCurrentPosition();
-        }
-
-        for (int i = 0; i < rightMotors.length; i++) {
-            distance += rightMotors[i].getCurrentPosition();
-        }
-        return distance/(leftMotors.length+rightMotors.length);
-    }
-
-    protected void setMovingPower (double p) {
-
-        for (int i = 0; i < leftMotors.length; i++) {
-            leftMotors[i].setPower(p);
-        }
-
-        for (int i = 0; i < rightMotors.length; i++) {
-            rightMotors[i].setPower(p);
-        }
-    }
-
 }

@@ -33,7 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name = "AutoDistance", group = "Teaching")
+@Autonomous(name = "AutoTurnMecanum", group = "Teaching")
 public class AutoTurnMecanum extends AutoRelic {
 
     protected HardwareMecanum robot= null;
@@ -63,7 +63,7 @@ public class AutoTurnMecanum extends AutoRelic {
         navigation.pidControlHeading.setKp(0.004);
         navigation.pidControlHeading.setKi(0.004);
         navigation.pidControlHeading.setKd(0.0000001);
-        navigation.pidControlHeading.setMaxIntegralError(0.22f/navigation.pidControlHeading.fKi);
+        navigation.pidControlHeading.setMaxIntegralError(0.2f/navigation.pidControlHeading.fKi);
         navigation.maxTurnDeltaPower = 1.0;
         navigation.convergeCountThreshold = 6;
         navigation.angleErrorTolerance = 1.1;
@@ -110,30 +110,5 @@ public class AutoTurnMecanum extends AutoRelic {
         }
         return 1;
     }
-
-    protected int getMovingDistance () {
-        int distance = 0;
-
-        for (int i = 0; i < leftMotors.length; i++) {
-            distance += leftMotors[i].getCurrentPosition();
-        }
-
-        for (int i = 0; i < rightMotors.length; i++) {
-            distance += rightMotors[i].getCurrentPosition();
-        }
-        return distance/(leftMotors.length+rightMotors.length);
-    }
-
-    protected void setMovingPower (double p) {
-
-        for (int i = 0; i < leftMotors.length; i++) {
-            leftMotors[i].setPower(p);
-        }
-
-        for (int i = 0; i < rightMotors.length; i++) {
-            rightMotors[i].setPower(p);
-        }
-    }
-
 
 }

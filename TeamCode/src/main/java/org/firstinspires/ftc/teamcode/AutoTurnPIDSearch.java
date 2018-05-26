@@ -31,13 +31,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "AutoDistancePIDSearch", group = "Teaching")
+@Autonomous(name = "AutoTurnPIDSearch", group = "Teaching")
 public class AutoTurnPIDSearch extends AutoTurnMecanum {
 
     int aiState =0;
 
     // TODO: change searching range
-    double [] Ps = { 0.0001, 0.004, 0.01 };
+    double [] Ps = { 0.001, 0.01, 0.05 };
     double [] Is = { 0.0001, 0.004, 0.01 };
     double [] Ds = { 0.00000, 0.00001, 0.0001 } ;
 
@@ -99,7 +99,7 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
                 navigation.pidControlHeading.setKp(Ps[pIndex]);
                 navigation.pidControlHeading.setKi(Is[iIndex]);
                 navigation.pidControlHeading.setKd(Ds[dIndex]);
-                navigation.pidControlHeading.setMaxIntegralError(0.22f/navigation.pidControlHeading.fKi);
+                navigation.pidControlHeading.setMaxIntegralError(0.2f/navigation.pidControlHeading.fKi);
 
                 // start timer
                 pidStartTS = System.currentTimeMillis();

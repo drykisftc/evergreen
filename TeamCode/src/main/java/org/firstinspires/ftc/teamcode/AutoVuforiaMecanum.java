@@ -100,29 +100,13 @@ public class AutoVuforiaMecanum extends AutoRelic {
 
     public int execute() {
         telemetry.addData("State:" , state);
-        telemetry.addData("leftMotor:", leftMotors[0]);
-        telemetry.addData("rightMotor:", rightMotors[0]);
         switch (state) {
             case 0:
-                // move forward
-                int distance = getMovingDistance();
-                int errorDis = (wheelLandMark + movingForwardDistance) - distance;
-                if (Math.abs(errorDis) < 50) {
-                    convergeCount ++;
-                } else
-                {
-                    convergeCount = 0;
-                }
-
-                if (convergeCount > 5) {
-                    state = 1;
-                    convergeCount = 0;
-                }
-
-                double power = encoderDisPID.update(errorDis, System.currentTimeMillis());
-                setMovingPower(Range.clip(power,-1,1));
+             // get  x y distance
 
                 break;
+            case 1:
+                // move
             default:
                 // stop
                 setMovingPower(0);
@@ -130,30 +114,5 @@ public class AutoVuforiaMecanum extends AutoRelic {
         }
         return 1;
     }
-
-    protected int getMovingDistance () {
-        int distance = 0;
-
-        for (int i = 0; i < leftMotors.length; i++) {
-            distance += leftMotors[i].getCurrentPosition();
-        }
-
-        for (int i = 0; i < rightMotors.length; i++) {
-            distance += rightMotors[i].getCurrentPosition();
-        }
-        return distance/(leftMotors.length+rightMotors.length);
-    }
-
-    protected void setMovingPower (double p) {
-
-        for (int i = 0; i < leftMotors.length; i++) {
-            leftMotors[i].setPower(p);
-        }
-
-        for (int i = 0; i < rightMotors.length; i++) {
-            rightMotors[i].setPower(p);
-        }
-    }
-
 
 }
