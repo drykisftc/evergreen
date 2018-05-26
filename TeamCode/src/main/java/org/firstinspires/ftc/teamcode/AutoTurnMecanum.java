@@ -34,18 +34,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 @Autonomous(name = "AutoDistance", group = "Teaching")
-public class AutoDistanceMecanum extends AutoRelic {
+public class AutoTurnMecanum extends AutoRelic {
 
     protected HardwareMecanum robot= null;
-
-    PIDControl encoderDisPID = new PIDControl();
 
     int movingForwardDistance = 3000;
     int wheelLandMark = 0;
     int turnDegree = 90;
 
-    int convergeCount =0;
-    public AutoDistanceMecanum() {
+    public AutoTurnMecanum() {
 
     }
 
@@ -62,11 +59,15 @@ public class AutoDistanceMecanum extends AutoRelic {
         rightMotors[0] = robot.motorRightFrontWheel;
         rightMotors[1] = robot.motorRightBackWheel;
 
-        encoderDisPID.setKp(0.0005);
-        encoderDisPID.setKi(0.000001);
-        encoderDisPID.setKd(0.000);
-        encoderDisPID.setMaxIntegralError(0.002f/ encoderDisPID.fKi);
-        convergeCount =0;
+        navigation = new Navigation(telemetry);
+        navigation.pidControlHeading.setKp(0.004);
+        navigation.pidControlHeading.setKi(0.004);
+        navigation.pidControlHeading.setKd(0.0000001);
+        navigation.pidControlHeading.setMaxIntegralError(0.22f/navigation.pidControlHeading.fKi);
+        navigation.maxTurnDeltaPower = 1.0;
+        navigation.convergeCountThreshold = 6;
+        navigation.angleErrorTolerance = 1.1;
+
     }
 
     @Override
@@ -76,7 +77,7 @@ public class AutoDistanceMecanum extends AutoRelic {
     @Override
     public void start() {
         wheelLandMark = getMovingDistance();
-        convergeCount =0;
+        navigation.resetTurn(leftMotors, rightMotors);
         state = 0;
     }
 
@@ -90,31 +91,21 @@ public class AutoDistanceMecanum extends AutoRelic {
 
         switch (state) {
             case 0:
-                // move forward
-                int distance = getMovingDistance();
-                telemetry.addData("Distance:" , distance);
-                int errorDis = (wheelLandMark + movingForwardDistance) - distance;
-                if (Math.abs(errorDis) < 50) {
-                    convergeCount ++;
-                } else
-                {
-                    convergeCount = 0;
-                }
-
-                if (convergeCount > 5) {
+                // turn by gyro
+                if (0 == navigation.turnByGyroCloseLoop(0, robot.imu.getAngularOrientation().firstAngle, turnDegree,
+                        leftMotors, rightMotors)) {
+                    navigation.resetTurn(leftMotors, rightMotors);
+                    getWheelLandmarks();
+                    wheelLandMark = getMovingDistance();
                     state = 1;
-                    convergeCount = 0;
                 }
-
-                double power = encoderDisPID.update(errorDis, System.currentTimeMillis());
-                setMovingPower(Range.clip(power,-1,1));
-
                 break;
             default:
                 // stop
                 setMovingPower(0);
+                navigation.resetTurn(leftMotors, rightMotors);
+                getWheelLandmarks();
                 wheelLandMark = getMovingDistance();
-                convergeCount =0;
                 return 0;
         }
         return 1;
