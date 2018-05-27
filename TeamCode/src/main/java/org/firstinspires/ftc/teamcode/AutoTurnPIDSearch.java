@@ -38,7 +38,7 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
 
     // TODO: change searching range
     double [] Ps = { 0.001, 0.01, 0.05 };
-    double [] Is = { 0.0001, 0.004, 0.01 };
+    double [] Is = { 0.001, 0.04, 0.1 };
     double [] Ds = { 0.00000, 0.00001, 0.0001 } ;
 
     int pIndex =0;
@@ -99,7 +99,7 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
                 navigation.pidControlHeading.setKp(Ps[pIndex]);
                 navigation.pidControlHeading.setKi(Is[iIndex]);
                 navigation.pidControlHeading.setKd(Ds[dIndex]);
-                navigation.pidControlHeading.setMaxIntegralError(0.2f/navigation.pidControlHeading.fKi);
+                navigation.pidControlHeading.setMaxIntegralError(0.3f/navigation.pidControlHeading.fKi);
 
                 // start timer
                 pidStartTS = System.currentTimeMillis();
@@ -125,7 +125,7 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
                 aiState = 3;
 
                 // flip turn angles
-                //turnDegree *= -1;
+                turnDegree *= -1;
 
                 break;
             case 3:

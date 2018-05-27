@@ -16,7 +16,6 @@
  *
  * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
  * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
@@ -39,9 +38,9 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
     int aiState =0;
 
     // TODO: change searching range
-    double [] Ps = { 0.0005, 0.005, 0.01 };
-    double [] Is = { 0.0001, 0.001, 0.01 };
-    double [] Ds = { 0.00000, 0.00001, 0.0001 } ;
+    double [] Ps = { 0.001, 0.0015, 0.002, 0.003 };
+    double [] Is = { 0.00001, 0.000015, 0.0002, 0.00025};
+    double [] Ds = { 0.00000 } ;
 
     int pIndex =0;
     int iIndex =0;
@@ -73,6 +72,21 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
     @Override
     public void loop() {
+
+        /* TODO: unwrap the for loop
+        for ( int i = 0 ; i < Ps.length; i++) {
+           for ( int j = 0 ; j < Is.length; j++ ) {
+              for ( int k = 0 ; k < Ds.length; k++ ) {
+                encoderDisPID.setKp(Ps[i]);
+                encoderDisPID.setKi(Is[j]);
+                encoderDisPID.setKd(Ds[k]);
+                encoderDisPID.setMaxIntegralError(0.002f/ encoderDisPID.fKi);
+              }
+           }
+
+        }
+         */
+        //// unwrap the for loop starts
         if (pIndex < Ps.length) {
             telemetry.addData("best Kp=", Ps[pIndex]);
         }
@@ -82,6 +96,8 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
         if (dIndex < Ds.length) {
             telemetry.addData("best kd=", Ds[dIndex]);
         }
+        //// unswrap the for loop ends
+
         switch (aiState)
         {
             case 0:
