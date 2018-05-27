@@ -37,8 +37,8 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
     int aiState =0;
 
     // TODO: change searching range
-    double [] Ps = { 0.001, 0.01, 0.05 };
-    double [] Is = { 0.001, 0.04, 0.1 };
+    double [] Ps = { 0.005, 0.01, 0.05 };
+    double [] Is = { 0.001, 0.004, 0.01 };
     double [] Ds = { 0.00000, 0.00001, 0.0001 } ;
 
     int pIndex =0;
