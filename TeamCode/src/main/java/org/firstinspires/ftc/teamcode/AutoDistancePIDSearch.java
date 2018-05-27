@@ -73,6 +73,10 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
     @Override
     public void loop() {
 
+        telemetry.addData("P index", pIndex);
+        telemetry.addData("I index", iIndex);
+        telemetry.addData("D index", dIndex);
+
         /* TODO: unwrap the for loop
         for ( int i = 0 ; i < Ps.length; i++) {
            for ( int j = 0 ; j < Is.length; j++ ) {

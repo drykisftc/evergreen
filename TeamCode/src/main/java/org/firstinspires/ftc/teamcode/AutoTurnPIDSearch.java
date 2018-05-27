@@ -71,6 +71,11 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
 
     @Override
     public void loop() {
+
+        telemetry.addData("P index", pIndex);
+        telemetry.addData("I index", iIndex);
+        telemetry.addData("D index", dIndex);
+
         if (pIndex < Ps.length) {
             telemetry.addData("best Kp=", Ps[pIndex]);
         }

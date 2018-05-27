@@ -33,6 +33,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 @Autonomous(name = "AutoVuforiaMecanum", group = "Teaching")
@@ -46,8 +53,11 @@ public class AutoVuforiaMecanum extends AutoRelic {
     int movingForwardDistance = 3000;
     int wheelLandMark = 0;
     int turnDegree = 90;
-
     int convergeCount =0;
+
+    double targetX = 200;
+    double targetY = 400;
+
     public AutoVuforiaMecanum() {
 
     }
@@ -102,14 +112,68 @@ public class AutoVuforiaMecanum extends AutoRelic {
         telemetry.addData("State:" , state);
         switch (state) {
             case 0:
-             // get  x y distance
+                // get  x y distance
+                OpenGLMatrix pose = vuforia.getGlyphCryptoPosition();
+                if (null == pose) {
+                    state = 1; // turn
+                } else {
+                    telemetry.addData("Pose", format(pose));
+
+                    VectorF trans = pose.getTranslation();
+                    Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC,
+                            AxesOrder.XYZ, AngleUnit.DEGREES);
+
+                    // Extract the X, Y, and Z components of the offset of the target relative to the robot
+                    //double tX = trans.get(0);
+                    double tY = trans.get(1);
+                    double tZ = trans.get(2);
+                    double tD = getVuforiaFrontBackDistance(pose);
+                    double tG = getVuforiaLeftRightDistance(pose);
+                    telemetry.addData("vuforia distance X=", trans.get(0));
+                    telemetry.addData("vuforia distance Y=", tY);
+                    telemetry.addData("vuforia distance Z=", tZ);
+                    telemetry.addData("vuforia degree 1=", rot.firstAngle);
+                    telemetry.addData("vuforia degree 2=", rot.secondAngle);
+                    telemetry.addData("vuforia degree 3=", rot.thirdAngle);
+                    telemetry.addData("Wall distance   =", tD);
+                    telemetry.addData("Image distance   =", tG);
+
+                    double xError = targetX - tG;
+                    double yError = targetY - tD;
+
+                    if ( Math.abs(xError) < 0.5 && Math.abs(yError)< 0.5) {
+                        state = 2;
+                    } else {
+
+                        if (Math.abs(xError) > Math.abs(yError)) {
+                            // move x
+                        } else {
+                            // move y
+                        }
+                    }
+                }
 
                 break;
             case 1:
-                // move
+                // turn to find target image
+                setMovingPower (-0.2, 02);
+                state = 0;
+                break;
+            case 2:
+                // move  (horizontal)
+
+                state = 3;
+                break;
+            case 3:
+                // move y
+
+                state = 4;
+                break;
             default:
                 // stop
                 setMovingPower(0);
+
+                state = 0;
                 return 0;
         }
         return 1;
