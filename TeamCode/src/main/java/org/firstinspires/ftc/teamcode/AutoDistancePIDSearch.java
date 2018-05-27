@@ -52,6 +52,8 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
 
     double bestP, bestI, bestD;
 
+    int count = 0;
+
     @Override
     public void start() {
         super.start();
@@ -63,6 +65,7 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
         bestP = 0;
         bestI = 0;
         bestD = 0;
+        count = 0;
     }
 
     @Override
@@ -76,6 +79,7 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
         telemetry.addData("P index", pIndex);
         telemetry.addData("I index", iIndex);
         telemetry.addData("D index", dIndex);
+        telemetry.addData("count", count);
 
         /* TODO: unwrap the for loop
         for ( int i = 0 ; i < Ps.length; i++) {
@@ -107,13 +111,13 @@ public class AutoDistancePIDSearch extends AutoDistanceMecanum {
             case 0:
                 super.start();
                 // TODO: loop through PID parameters
-                if (Ps.length >= pIndex) {
+                if (Ps.length <= pIndex) {
                     pIndex = 0;
                 }
-                if (Is.length >= iIndex) {
+                if (Is.length <= iIndex) {
                     iIndex = 0;
                 }
-                if (Ds.length >= dIndex) {
+                if (Ds.length <= dIndex) {
                     dIndex = 0;
                 }
 

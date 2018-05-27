@@ -90,13 +90,13 @@ public class AutoTurnPIDSearch extends AutoTurnMecanum {
             case 0:
                 super.start();
                 // TODO: loop through PID parameters
-                if (Ps.length >= pIndex) {
+                if (Ps.length <= pIndex) {
                     pIndex = 0;
                 }
-                if (Is.length >= iIndex) {
+                if (Is.length <= iIndex) {
                     iIndex = 0;
                 }
-                if (Ds.length >= dIndex) {
+                if (Ds.length <= dIndex) {
                     dIndex = 0;
                 }
 
