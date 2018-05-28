@@ -48,15 +48,17 @@ public class AutoVuforiaMecanum extends AutoRelic {
     protected HardwareMecanum robot= null;
     protected HardwareVuforia vuforia = null;
 
-    PIDControl encoderDisPID = new PIDControl();
+    PIDControl xDisPID = new PIDControl();
+    PIDControl yDisPID = new PIDControl();
 
     int movingForwardDistance = 3000;
     int wheelLandMark = 0;
     int turnDegree = 90;
     int convergeCount =0;
 
-    double targetX = 200;
-    double targetY = 400;
+    double targetX =2;
+    double targetY = 12;
+    double targetThreshold = 0.5;
 
     public AutoVuforiaMecanum() {
 
@@ -76,10 +78,15 @@ public class AutoVuforiaMecanum extends AutoRelic {
         rightMotors[1] = robot.motorRightBackWheel;
 
 
-        encoderDisPID.setKp(0.0005);
-        encoderDisPID.setKi(0.000001);
-        encoderDisPID.setKd(0.000);
-        encoderDisPID.setMaxIntegralError(0.002f/ encoderDisPID.fKi);
+        xDisPID.setKp(0.0005);
+        xDisPID.setKi(0.000001);
+        xDisPID.setKd(0.000);
+        xDisPID.setMaxIntegralError(0.002f/ xDisPID.fKi);
+
+        yDisPID.setKp(0.0005);
+        yDisPID.setKi(0.000001);
+        yDisPID.setKd(0.000);
+        yDisPID.setMaxIntegralError(0.002f/ yDisPID.fKi);
         convergeCount =0;
 
         vuforia = new HardwareVuforia(VuforiaLocalizer.CameraDirection.BACK);
@@ -141,14 +148,19 @@ public class AutoVuforiaMecanum extends AutoRelic {
                     double xError = targetX - tG;
                     double yError = targetY - tD;
 
-                    if ( Math.abs(xError) < 0.5 && Math.abs(yError)< 0.5) {
+                    if ( Math.abs(xError) < targetThreshold && Math.abs(yError)< targetThreshold) {
                         state = 2;
                     } else {
 
                         if (Math.abs(xError) > Math.abs(yError)) {
                             // move x
+                            double power = xDisPID.update(xError, System.currentTimeMillis());
+                            sideMoveAtPower(power);
+
                         } else {
                             // move y
+                            double power = yDisPID.update(yError, System.currentTimeMillis());
+                            moveAtPower(power);
                         }
                     }
                 }
@@ -159,16 +171,6 @@ public class AutoVuforiaMecanum extends AutoRelic {
                 setMovingPower (-0.2, 02);
                 state = 0;
                 break;
-            case 2:
-                // move  (horizontal)
-
-                state = 3;
-                break;
-            case 3:
-                // move y
-
-                state = 4;
-                break;
             default:
                 // stop
                 setMovingPower(0);
@@ -177,6 +179,27 @@ public class AutoVuforiaMecanum extends AutoRelic {
                 return 0;
         }
         return 1;
+    }
+
+    public void sideMoveAtPower(double p) {
+        robot.motorLeftFrontWheel.setPower(-p);
+        robot.motorRightBackWheel.setPower(-p);
+        robot.motorRightFrontWheel.setPower(p);
+        robot.motorLeftBackWheel.setPower(p);
+    }
+
+    public void rightDiagonalMoveAtPower(double p) {
+        robot.motorRightFrontWheel.setPower(p);
+        robot.motorRightBackWheel.setPower(0.0);
+        robot.motorLeftBackWheel.setPower(p);
+        robot.motorLeftFrontWheel.setPower(0.0);
+    }
+
+    public void leftDiagonalMoveAtPower(double p) {
+        robot.motorLeftFrontWheel.setPower(p);
+        robot.motorLeftBackWheel.setPower(0.0);
+        robot.motorRightBackWheel.setPower(p);
+        robot.motorRightFrontWheel.setPower(0.0);
     }
 
 }
